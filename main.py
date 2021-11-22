@@ -18,14 +18,19 @@ pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', None)
 
 for data_id, dataset in enumerate(datasets):
-    dataset = np.genfromtxt("datasets/%s.csv" % (dataset), delimiter=",")
-    X = dataset[:, :-1]
-    y = dataset[:, -1].astype(int)
+    df = pd.read_csv("datasets/%s.csv" % (dataset), delimiter=",")
+    df = df.dropna()
+    df = df.reset_index(drop=True)
+
+    X = df[:, :-1]
+    y = df[:, -1].astype(int)
 
     venerable_features = chi2test(X, y) # names of venerable features
+    create_selected_features(dataset, venerable_features) # save file .csv with only venerable features
+
 
     # Evaluate params <- we are here
-    evaluate_mlp_model_params(X, y) # <- prints sorted list of params by quality
+    # evaluate_mlp_model_params(X, y) # <- prints sorted list of params by quality
     # Create
     # mlp_model = fit_mlp_model(X_tfidf_feat, df['label'])
     # Save -- after training
