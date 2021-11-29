@@ -1,3 +1,5 @@
+import pandas as pd
+
 def create_selected_features(dataset, cols):
     selected_features = pd.read_csv('datasets/%s.csv' % (dataset),
                                     usecols=cols)

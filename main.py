@@ -1,14 +1,14 @@
 import pandas as pd
 import numpy as np
 
-
+from features import chi2test, features_creation
 import models.mlp
 
 from models.mlp  import evaluate_mlp_model_params, fit_mlp_model
 
 
 # datasets in csv
-datasets = []
+datasets = ['1_appendicitis', '2_vehicle', '4_spectfheart', '5_spambase', '6_optdigits', '7_coil2000', '9_semeion']
 
 
 
@@ -18,15 +18,23 @@ pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', None)
 
 for data_id, dataset in enumerate(datasets):
-    df = pd.read_csv("datasets/%s.csv" % (dataset), delimiter=",")
+    df = pd.read_csv("datasets/%s.csv" % (dataset), delimiter=",", dtype='float32')
     df = df.dropna()
     df = df.reset_index(drop=True)
 
-    X = df[:, :-1]
-    y = df[:, -1].astype(int)
+    X = df.iloc[:, :-1]
+    y = df.iloc[:, -1]
 
-    venerable_features = chi2test(X, y) # names of venerable features
-    create_selected_features(dataset, venerable_features) # save file .csv with only venerable features
+
+    valuable_features_boolean = chi2test.chi2test(X, y) # True, if feature is valuable
+    valuable_features = []
+    for val in range(len(valuable_features_boolean)):
+        if(valuable_features_boolean[val] == True):
+            valuable_features.append(val)
+    
+    
+    
+    features_creation.create_selected_features(dataset, valuable_features) # save file .csv with only valueable features
 
 
     # Evaluate params <- we are here
@@ -41,6 +49,7 @@ for data_id, dataset in enumerate(datasets):
 
 
 # remember to use venv!
+# remebert to create dir datasets/ and fill it before dealing with code!
 # /usr/bin/python3 -m pip install --upgrade pi
 # pip install numpy
 # pip install tensorflow
