@@ -5,10 +5,11 @@ from features import chi2test, features
 import models.mlp
 
 from models.mlp  import evaluate_mlp_model_params, fit_mlp_model
+from models.rnn  import evaluate_rnn_model_params, fit_rnn_model
 
 
 # datasets in csv
-datasets = ['7_coil2000', '9_semeion']
+datasets = ['2_vehicle', '4_spectfheart', '5_spambase_selected', '6_optdigits', '7_coil2000', '9_semeion']
 
 
 
@@ -48,12 +49,25 @@ for data_id, dataset in enumerate(datasets):
 
 
 
-    # Uncomment only when there is a need to do something about MLP model
+        ### Uncomment only when there is a need to do something about MLP model
     # Evaluate params
-    file = open("params_sorted_by_mean_all_models.txt", "a")
+    file = open("params_sorted_by_mean_mlp_model.txt", "a")
     file.write("datasets/%s_selected.csv" % (dataset))
     file.close()
     evaluate_mlp_model_params(X, y)
+    # Create
+    # mlp_model = fit_mlp_model(X, y)
+    # Save
+    # mlp_model.save('models/mlp_%s_model.h5' % (dataset))
+    # Load
+    # mlp_model = load_model('models/mlp_model.h5')
+
+        ### Uncomment only when there is a need to do something about MLP model
+    # Evaluate params
+    file = open("params_sorted_by_mean_rnn_model.txt", "a")
+    file.write("datasets/%s_selected.csv" % (dataset))
+    file.close()
+    evaluate_rnn_model_params(X, y)
     # Create
     # mlp_model = fit_mlp_model(X, y)
     # Save
