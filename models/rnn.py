@@ -14,7 +14,7 @@ from tensorflow.keras.utils import plot_model
 
 def create_model(nmb_of_features, nmb_of_labels, optimizer='SGD', loss='categorical_crossentropy'):
     model = Sequential()
-    model.add(Embedding(nmb_of_features, 64))
+    model.add(Embedding(1200, 64))
     model.add(
         LSTM(64, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform', return_sequences=True))
     model.add(LSTM(32, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform'))
@@ -64,7 +64,9 @@ def evaluate_rnn_model_params(X: pd.DataFrame, labels: pd.DataFrame):
     grid_result = grid.fit(X, labels)
 
     print(pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False))
-
+    file = open("params_sorted_by_mean_rnn_model.txt", "a")
+    file.write(pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False).to_string())
+    file.close()
 
 def predict_single_instance(model, instance):
     prediction = model.predict(np.array([instance]))

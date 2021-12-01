@@ -48,6 +48,19 @@ for data_id, dataset in enumerate(datasets):
     y = df.iloc[:, -1]
 
 
+        ### Uncomment only when there is a need to do something about MLP model
+    # Evaluate params
+    file = open("params_sorted_by_mean_rnn_model.txt", "a")
+    file.write("datasets/%s_selected.csv" % (dataset))
+    file.close()
+    evaluate_rnn_model_params(X, y)
+    # Create
+    # mlp_model = fit_mlp_model(X, y)
+    # Save
+    # mlp_model.save('models/mlp_%s_model.h5' % (dataset))
+    # Load
+    # mlp_model = load_model('models/mlp_model.h5')
+
 
         ### Uncomment only when there is a need to do something about MLP model
     # Evaluate params
@@ -62,18 +75,7 @@ for data_id, dataset in enumerate(datasets):
     # Load
     # mlp_model = load_model('models/mlp_model.h5')
 
-        ### Uncomment only when there is a need to do something about MLP model
-    # Evaluate params
-    file = open("params_sorted_by_mean_rnn_model.txt", "a")
-    file.write("datasets/%s_selected.csv" % (dataset))
-    file.close()
-    evaluate_rnn_model_params(X, y)
-    # Create
-    # mlp_model = fit_mlp_model(X, y)
-    # Save
-    # mlp_model.save('models/mlp_%s_model.h5' % (dataset))
-    # Load
-    # mlp_model = load_model('models/mlp_model.h5')
+
 
 
 
