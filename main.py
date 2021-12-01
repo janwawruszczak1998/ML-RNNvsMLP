@@ -1,14 +1,14 @@
 import pandas as pd
 import numpy as np
 
-from features import chi2test, features_creation
+from features import chi2test, features
 import models.mlp
 
 from models.mlp  import evaluate_mlp_model_params, fit_mlp_model
 
 
 # datasets in csv
-datasets = ['1_appendicitis', '2_vehicle', '4_spectfheart', '5_spambase', '6_optdigits', '7_coil2000', '9_semeion']
+datasets = ['7_coil2000', '9_semeion']
 
 
 
@@ -18,32 +18,47 @@ pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', None)
 
 for data_id, dataset in enumerate(datasets):
+
+        ### SELECTION uncomment only if features need to be selected
+    # df = pd.read_csv("datasets/%s.csv" % (dataset), delimiter=",", dtype='float32')
+    # df = df.dropna()
+    # df = df.reset_index(drop=True)
+    #
+    # X = df.iloc[:, :-1]
+    # y = df.iloc[:, -1]
+    #
+    # valuable_features_boolean = chi2test.chi2test(X, y) # True, if feature is valuable
+    # valuable_features = []
+    # for val in range(len(valuable_features_boolean)):
+    #     if(valuable_features_boolean[val] == True):
+    #         valuable_features.append(val)
+    # features.create_selected_features(dataset, valuable_features) # save file .csv with only valueable features
+
+
+        ### EVALUATION OF PARAMS <- we are here
+    df = pd.read_csv("datasets/%s_selected.csv" % (dataset), delimiter=",", dtype='float32')
+    df = df.dropna()
+    df = df.reset_index(drop=True)
+    X = df.iloc[:, :]
+
     df = pd.read_csv("datasets/%s.csv" % (dataset), delimiter=",", dtype='float32')
     df = df.dropna()
     df = df.reset_index(drop=True)
-
-    X = df.iloc[:, :-1]
     y = df.iloc[:, -1]
 
 
-    valuable_features_boolean = chi2test.chi2test(X, y) # True, if feature is valuable
-    valuable_features = []
-    for val in range(len(valuable_features_boolean)):
-        if(valuable_features_boolean[val] == True):
-            valuable_features.append(val)
-    
-    
-    
-    features_creation.create_selected_features(dataset, valuable_features) # save file .csv with only valueable features
 
-
-    # Evaluate params <- we are here
-    # evaluate_mlp_model_params(X, y) # <- prints sorted list of params by quality
+    # Uncomment only when there is a need to do something about MLP model
+    # Evaluate params
+    file = open("params_sorted_by_mean_all_models.txt", "a")
+    file.write("datasets/%s_selected.csv" % (dataset))
+    file.close()
+    evaluate_mlp_model_params(X, y)
     # Create
-    # mlp_model = fit_mlp_model(X_tfidf_feat, df['label'])
-    # Save -- after training
-    # mlp_model.save('models/mlp_model.h5')
-    # Load -- after saving
+    # mlp_model = fit_mlp_model(X, y)
+    # Save
+    # mlp_model.save('models/mlp_%s_model.h5' % (dataset))
+    # Load
     # mlp_model = load_model('models/mlp_model.h5')
 
 

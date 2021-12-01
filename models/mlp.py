@@ -12,7 +12,7 @@ from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.utils import plot_model
 
 
-def create_model(nmb_of_features, optimizer='adam', loss='categorical_crossentropy', dropout_rate=0.25):
+def create_model(nmb_of_features, nmb_of_labels, optimizer='adam', loss='categorical_crossentropy', dropout_rate=0.25):
     model = Sequential()
     model.add(Dense(nmb_of_features, activation='relu'))
     model.add(Dense(512, activation='relu'))
@@ -28,7 +28,7 @@ def create_model(nmb_of_features, optimizer='adam', loss='categorical_crossentro
     model.add(Dense(16, activation='relu'))
     model.add(Dense(8, activation='relu'))
     model.add(Dense(8, activation='relu'))
-    model.add(Dense(2, activation='softmax'))
+    model.add(Dense(nmb_of_labels, activation='softmax'))
 
     model.compile(optimizer=optimizer,
                   loss=loss,
@@ -52,10 +52,11 @@ def fit_mlp_model(X_tfidf_feat, labels, nmb_of_features=4, optimizer='adam', los
     return model
 
 
-def evaluate_mlp_model_params(X_tfidf_feat: pd.DataFrame, labels: pd.DataFrame):
-    nmb_of_features = X_tfidf_feat.shape[1]
+def evaluate_mlp_model_params(X: pd.DataFrame, labels: pd.DataFrame):
+    nmb_of_features = X.shape[1]
+    nmb_of_labels = len(set(labels))
 
-    model = KerasClassifier(build_fn=create_model, nmb_of_features=nmb_of_features)
+    model = KerasClassifier(build_fn=create_model, nmb_of_features=nmb_of_features, nmb_of_labels=nmb_of_labels)
 
     param_grid = {
         'epochs': [20, 40, 60, 80],
@@ -65,12 +66,16 @@ def evaluate_mlp_model_params(X_tfidf_feat: pd.DataFrame, labels: pd.DataFrame):
         'loss': ['mse', 'categorical_crossentropy']
     }
 
+
     grid = GridSearchCV(estimator=model, param_grid=param_grid,
                         cv=StratifiedKFold(n_splits=5, random_state=1410, shuffle=True),
                         n_jobs=-1, return_train_score=True)
-    grid_result = grid.fit(X_tfidf_feat, labels)
+    grid_result = grid.fit(X, labels)
 
     print(pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False))
+    file = open("params_sorted_by_mean_all_models.txt", "a")
+    file.write(pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False).to_string())
+    file.close()
 
 
 def predict_single_instance(model, instance):
