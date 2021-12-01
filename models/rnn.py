@@ -14,7 +14,7 @@ from tensorflow.keras.utils import plot_model
 
 def create_model(nmb_of_features, nmb_of_labels, optimizer='SGD', loss='categorical_crossentropy'):
     model = Sequential()
-    model.add(Embedding(1000, 32))
+    model.add(Embedding(nmb_of_features, 64))
     model.add(
         LSTM(64, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform', return_sequences=True))
     model.add(LSTM(32, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform'))
