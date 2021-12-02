@@ -1,6 +1,5 @@
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 import models.mlp
 from features.preprocessing import preprocess, datasets
 
@@ -18,15 +17,9 @@ if __name__ == "__main__":
 
     # ### EVALUATION OF PARAMS <- we are here
     # for data_id, dataset in enumerate(datasets):
-    #     df = pd.read_csv("datasets/%s_selected.csv" % (dataset), delimiter=",", dtype='float32')
-    #     df = df.dropna()
-    #     df = df.reset_index(drop=True)
-    #     X = df.iloc[:, :]
-    #
-    #     df = pd.read_csv("datasets/%s.csv" % (dataset), delimiter=",", dtype='float32')
-    #     df = df.dropna()
-    #     df = df.reset_index(drop=True)
-    #     y = df.iloc[:, -1]
+    #     data = np.load("datasets/%s_selected.npy" % (dataset))
+    #     X = data[:, :-1]
+    #     y = data[:, -1].astype(int)
     #
     #     ### Uncomment only when there is a need to do something about MLP model
     #     # Evaluate params
