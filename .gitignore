@@ -1,5 +1,4 @@
-models/__pycache__
-features/__pycache__
+__pycache__
 datasets
 venv
 .idea
