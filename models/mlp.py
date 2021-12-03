@@ -26,8 +26,6 @@ def create_model(nmb_of_features, nmb_of_labels, optimizer='adam', loss='categor
     model.add(Dropout(dropout_rate))
     model.add(Dense(16, activation='relu'))
     model.add(Dense(16, activation='relu'))
-    model.add(Dense(8, activation='relu'))
-    model.add(Dense(8, activation='relu'))
     model.add(Dense(nmb_of_labels, activation='softmax'))
 
     model.compile(optimizer=optimizer,
@@ -37,10 +35,10 @@ def create_model(nmb_of_features, nmb_of_labels, optimizer='adam', loss='categor
     return model
 
 
-def fit_mlp_model(X_tfidf_feat, labels, nmb_of_features=4, optimizer='adam', loss='categorical_crossentropy', epochs=20,
+def fit_mlp_model(X, labels, nmb_of_features=4, optimizer='adam', loss='categorical_crossentropy', epochs=20,
                   batch_size=16, dropout_rate=0.25):
     model = create_model(nmb_of_features, optimizer, loss, dropout_rate)
-    X_train, X_test, y_train, y_test = train_test_split(X_tfidf_feat, labels, test_size=0.2, stratify=labels)
+    X_train, X_test, y_train, y_test = train_test_split(X, labels, test_size=0.2, stratify=labels)
     y_train_cat = to_categorical(y_train, 2)
     y_test_cat = to_categorical(y_test, 2)
     history = model.fit(X_train, y_train_cat, validation_data=(X_test, y_test_cat), batch_size=batch_size,
@@ -52,7 +50,7 @@ def fit_mlp_model(X_tfidf_feat, labels, nmb_of_features=4, optimizer='adam', los
     return model
 
 
-def evaluate_mlp_model_params(X: pd.DataFrame, labels: pd.DataFrame):
+def evaluate_mlp_model_params(X, labels):
     nmb_of_features = X.shape[1]
     nmb_of_labels = len(set(labels))
 
@@ -72,9 +70,10 @@ def evaluate_mlp_model_params(X: pd.DataFrame, labels: pd.DataFrame):
                         n_jobs=-1, return_train_score=True)
     grid_result = grid.fit(X, labels)
 
-    print(pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False))
-    file = open("params_sorted_by_mean_all_models.txt", "a")
-    file.write(pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False).to_string())
+    df = pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False)
+    file = open("params_sorted_by_mean_mlp_model.txt", "a")
+    file.write(df.to_string())
+    file.write("\n")
     file.close()
 
 

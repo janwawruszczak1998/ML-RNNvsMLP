@@ -1,23 +1,29 @@
 import pandas as pd
 import numpy as np
 
-from keras.layers import Dense, Embedding, LSTM
+from tensorflow.keras.layers import Input, Dense, Flatten, LSTM
 from keras.models import Sequential
 
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.model_selection import StratifiedKFold
 from tensorflow.keras.utils import to_categorical
+from tensorflow import convert_to_tensor
 
 from tensorflow.keras.utils import plot_model
 
 
-def create_model(nmb_of_features, nmb_of_labels, optimizer='SGD', loss='categorical_crossentropy'):
+def create_model(X, nmb_of_features, nmb_of_labels, optimizer='SGD', loss='categorical_crossentropy'):
+    
+    
+    input = Input(shape=(nmb_of_features, 1))
+    np.reshape(X,(X.shape[0],nmb_of_features,1))
+    print(X)
+
     model = Sequential()
-    model.add(Embedding(1200, 64))
     model.add(
-        LSTM(64, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform', return_sequences=True))
-    model.add(LSTM(32, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform'))
+        LSTM(64, input, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform',  return_sequences=True))
+    model.add(LSTM(32, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform'), activation='relu')
     model.add(Dense(256, activation='relu'))
     model.add(Dense(64, activation='relu'))
     model.add(Dense(nmb_of_labels, activation='softmax'))
@@ -45,17 +51,17 @@ def fit_rnn_model(X, labels, optimizer='adam', loss='categorical_crossentropy', 
     return model
 
 
-def evaluate_rnn_model_params(X: pd.DataFrame, labels: pd.DataFrame):
+def evaluate_rnn_model_params(X, labels):
     nmb_of_features = X.shape[1]
     nmb_of_labels = len(set(labels))
 
-    model = KerasClassifier(build_fn=create_model, nmb_of_features=nmb_of_features, nmb_of_labels=nmb_of_labels)
+    model = KerasClassifier(build_fn=create_model, X=X, nmb_of_features=nmb_of_features, nmb_of_labels=nmb_of_labels)
 
     param_grid = {
-        'epochs': [20, 40, 60, 80],
-        'batch_size': [16, 32, 64, 128],
-        'optimizer': ['rmsprop', 'adam', 'SGD'],
-        'loss': ['mse', 'categorical_crossentropy']
+        'epochs': [20],
+        'batch_size': [16],
+        'optimizer': ['rmsprop'],
+        'loss': ['mse']
     }
 
     grid = GridSearchCV(estimator=model, param_grid=param_grid,
@@ -63,10 +69,12 @@ def evaluate_rnn_model_params(X: pd.DataFrame, labels: pd.DataFrame):
                         n_jobs=-1, return_train_score=True)
     grid_result = grid.fit(X, labels)
 
-    print(pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False))
+    df = pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False)
     file = open("params_sorted_by_mean_rnn_model.txt", "a")
-    file.write(pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False).to_string())
+    file.write(df.to_string())
+    file.write("\n")
     file.close()
+    
 
 def predict_single_instance(model, instance):
     prediction = model.predict(np.array([instance]))
