@@ -13,55 +13,48 @@ from tensorflow import convert_to_tensor
 from tensorflow.keras.utils import plot_model
 
 
-def create_model(X, nmb_of_features, nmb_of_labels, optimizer='SGD', loss='categorical_crossentropy'):
-    
-    
-    input = Input(shape=(nmb_of_features, 1))
-    np.reshape(X,(X.shape[0],nmb_of_features,1))
-    print(X)
+def create_model(X, nmb_of_labels, optimizer='SGD', loss='categorical_crossentropy'):
 
     model = Sequential()
-    model.add(
-        LSTM(64, input, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform',  return_sequences=True))
-    model.add(LSTM(32, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform'), activation='relu')
-    model.add(Dense(256, activation='relu'))
-    model.add(Dense(64, activation='relu'))
+    #model.add(Input(shape=X.shape))
+    model.add(LSTM(64, input_shape=(X.shape[1], X.shape[2]), dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform', activation='tanh', return_sequences=True))
+    model.add(LSTM(32, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform', activation='tanh'))
+    model.add(Dense(256, activation='tanh'))
+    model.add(Dense(64, activation='tanh'))
     model.add(Dense(nmb_of_labels, activation='softmax'))
-    model.summary()
 
     model.compile(optimizer=optimizer,
                   loss=loss,
                   metrics=['accuracy'])
 
-    model.summary()
-
     return model
 
 
-def fit_rnn_model(X, labels, optimizer='adam', loss='categorical_crossentropy', epochs=40, batch_size=64):
+def fit_rnn_model(X, y, optimizer='adam', loss='categorical_crossentropy', epochs=40, batch_size=64):
     model = create_model(optimizer, loss)
-    X_train, X_test, y_train, y_test = train_test_split(X, labels, test_size=0.2, stratify=labels)
-    y_train_cat = to_categorical(y_train, 2)
-    y_test_cat = to_categorical(y_test, 2)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+    y_train_cat = to_categorical(y_train, len(set(y)))
+    y_test_cat = to_categorical(y_test, len(set(y)))
     history = model.fit(X_train, y_train_cat, validation_data=(X_test, y_test_cat), batch_size=batch_size,
                         epochs=epochs)
 
     model.summary()
+    plot_model(model, to_file='rnn_model.png', show_shapes=True, show_layer_names=True)
 
     return model
 
 
 def evaluate_rnn_model_params(X, labels):
-    nmb_of_features = X.shape[1]
     nmb_of_labels = len(set(labels))
+    X = X.reshape(X.shape[0], X.shape[1], 1)
 
-    model = KerasClassifier(build_fn=create_model, X=X, nmb_of_features=nmb_of_features, nmb_of_labels=nmb_of_labels)
+    model = KerasClassifier(build_fn=create_model, X=X, nmb_of_labels=nmb_of_labels)
 
     param_grid = {
-        'epochs': [20],
-        'batch_size': [16],
-        'optimizer': ['rmsprop'],
-        'loss': ['mse']
+        'epochs': [20, 40, 60, 80],
+        'batch_size': [16, 32, 64, 128],
+        'optimizer': ['rmsprop', 'adam', 'SGD'],
+        'loss': ['mse', 'categorical_crossentropy']
     }
 
     grid = GridSearchCV(estimator=model, param_grid=param_grid,

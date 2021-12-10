@@ -14,35 +14,36 @@ from tensorflow.keras.utils import plot_model
 
 def create_model(nmb_of_features, nmb_of_labels, optimizer='adam', loss='categorical_crossentropy', dropout_rate=0.25):
     model = Sequential()
-    model.add(Dense(nmb_of_features, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(256, activation='relu'))
+    model.add(Dense(nmb_of_features, activation='tanh'))
+    model.add(Dense(512, activation='tanh'))
+    model.add(Dense(256, activation='tanh'))
     model.add(Dropout(dropout_rate))
-    model.add(Dense(64, activation='relu'))
-    model.add(Dense(64, activation='relu'))
+    model.add(Dense(64, activation='tanh'))
+    model.add(Dense(64, activation='tanh'))
     model.add(Dropout(dropout_rate))
-    model.add(Dense(32, activation='relu'))
-    model.add(Dense(32, activation='relu'))
+    model.add(Dense(32, activation='tanh'))
+    model.add(Dense(32, activation='tanh'))
     model.add(Dropout(dropout_rate))
-    model.add(Dense(16, activation='relu'))
-    model.add(Dense(16, activation='relu'))
+    model.add(Dense(16, activation='tanh'))
+    model.add(Dense(16, activation='tanh'))
     model.add(Dense(nmb_of_labels, activation='softmax'))
 
     model.compile(optimizer=optimizer,
                   loss=loss,
                   metrics=['accuracy'])
 
+
     return model
 
 
-def fit_mlp_model(X, labels, nmb_of_features=4, optimizer='adam', loss='categorical_crossentropy', epochs=20,
-                  batch_size=16, dropout_rate=0.25):
-    model = create_model(nmb_of_features, optimizer, loss, dropout_rate)
-    X_train, X_test, y_train, y_test = train_test_split(X, labels, test_size=0.2, stratify=labels)
-    y_train_cat = to_categorical(y_train, 2)
-    y_test_cat = to_categorical(y_test, 2)
-    history = model.fit(X_train, y_train_cat, validation_data=(X_test, y_test_cat), batch_size=batch_size,
-                        epochs=epochs)
+def fit_mlp_model(X, y):
+    nmb_of_features = X.shape[1]
+    nmb_of_labels = len(set(y))
+
+    model = create_model(nmb_of_features=nmb_of_features, nmb_of_labels=nmb_of_labels, optimizer='rmsprop', loss='categorical_crossentropy', dropout_rate=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+    history = model.fit(X_train, y_train, validation_data=(X_test, y_test), batch_size=32, epochs=80)
 
     model.summary()
     plot_model(model, to_file='mlp_model.png', show_shapes=True, show_layer_names=True)
@@ -50,9 +51,9 @@ def fit_mlp_model(X, labels, nmb_of_features=4, optimizer='adam', loss='categori
     return model
 
 
-def evaluate_mlp_model_params(X, labels):
+def evaluate_mlp_model_params(X, y):
     nmb_of_features = X.shape[1]
-    nmb_of_labels = len(set(labels))
+    nmb_of_labels = len(set(y))
 
     model = KerasClassifier(build_fn=create_model, nmb_of_features=nmb_of_features, nmb_of_labels=nmb_of_labels)
 
@@ -68,7 +69,7 @@ def evaluate_mlp_model_params(X, labels):
     grid = GridSearchCV(estimator=model, param_grid=param_grid,
                         cv=StratifiedKFold(n_splits=5, random_state=1410, shuffle=True),
                         n_jobs=-1, return_train_score=True)
-    grid_result = grid.fit(X, labels)
+    grid_result = grid.fit(X, y)
 
     df = pd.DataFrame(grid_result.cv_results_).sort_values('mean_test_score', ascending=False)
     file = open("params_sorted_by_mean_mlp_model.txt", "a")

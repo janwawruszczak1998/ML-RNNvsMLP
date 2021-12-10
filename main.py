@@ -23,16 +23,18 @@ if __name__ == "__main__":
     
         ### Uncomment only when there is a need to do something about MLP model
         # Evaluate params
-        # file = open("params_sorted_by_mean_mlp_model.txt", "a")
-        # file.write("\ndatasets/%s_selected\n" % (dataset))
-        # file.close()
-        # evaluate_mlp_model_params(X, y)
+        for_mlp = ['5_spambase', '6_optdigits', '7_coil2000', '8_musk', '9_semeion']
+        if(dataset in for_mlp):
+            file = open("params_sorted_by_mean_mlp_model.txt", "a")
+            file.write("\ndatasets/%s_selected\n" % (dataset))
+            file.close()
+            evaluate_mlp_model_params(X, y)
         # Create
         # mlp_model = fit_mlp_model(X, y)
         # Save
         # mlp_model.save('models/mlp_%s_model.h5' % (dataset))
         # Load
-        # mlp_model = load_model('models/mlp_model.h5')
+        # mlp_model = load_model('models/mlp_%s_model.h5' % (dataset))
     
         ### Uncomment only when there is a need to do something about RNN model
         # Evaluate params
@@ -41,7 +43,7 @@ if __name__ == "__main__":
         file.close()
         evaluate_rnn_model_params(X, y)
         # Create
-        # rnn_model = fit_rnn_model(X, y)
+        # rnn_model = fit_rnn_model(X, len(set(y)))
         # Save
         # rnn_model.save('models/rnn_%s_model.h5' % (dataset))
         # Load
