@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense, Dropout, Flatten
 
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.model_selection import StratifiedKFold
@@ -14,7 +14,7 @@ from tensorflow.keras.utils import plot_model
 
 def create_model(nmb_of_features, nmb_of_labels, optimizer='adam', loss='categorical_crossentropy', dropout_rate=0.25):
     model = Sequential()
-    model.add(Dense(nmb_of_features, activation='tanh'))
+    model.add(Flatten(input_shape=(28, 28)))
     model.add(Dense(512, activation='tanh'))
     model.add(Dense(256, activation='tanh'))
     model.add(Dropout(dropout_rate))
@@ -62,7 +62,7 @@ def evaluate_mlp_model_params(X, y):
         'batch_size': [16, 32, 64, 128],
         'dropout_rate': [0.2, 0.25, 0.3],
         'optimizer': ['rmsprop', 'adam', 'SGD'],
-        'loss': ['mse', 'categorical_crossentropy']
+        'loss': ['categorical_crossentropy']
     }
 
 

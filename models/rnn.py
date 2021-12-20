@@ -16,8 +16,7 @@ from tensorflow.keras.utils import plot_model
 def create_model(X, nmb_of_labels, optimizer='SGD', loss='categorical_crossentropy'):
 
     model = Sequential()
-    #model.add(Input(shape=X.shape))
-    model.add(LSTM(64, input_shape=(X.shape[1], X.shape[2]), dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform', activation='tanh', return_sequences=True))
+    model.add(LSTM(64, input_shape=X.shape[1:], dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform', activation='tanh', return_sequences=True))
     model.add(LSTM(32, dropout=0.3, recurrent_dropout=0.3, recurrent_initializer='glorot_uniform', activation='tanh'))
     model.add(Dense(256, activation='tanh'))
     model.add(Dense(64, activation='tanh'))
@@ -46,7 +45,7 @@ def fit_rnn_model(X, y, optimizer='adam', loss='categorical_crossentropy', epoch
 
 def evaluate_rnn_model_params(X, labels):
     nmb_of_labels = len(set(labels))
-    X = X.reshape(X.shape[0], X.shape[1], 1)
+    #X = X.reshape(X.shape[0], X.shape[1], 1)
 
     model = KerasClassifier(build_fn=create_model, X=X, nmb_of_labels=nmb_of_labels)
 
